@@ -1,0 +1,901 @@
+/* =========================================
+نظام المبيعات - نظام الألوان والخطوط
+========================================= */
+
+:root {
+  --color-primary: #1B4332;
+  --color-primary-light: #2D6A4F;
+  --color-primary-dark: #12301F;
+  --color-accent: #C9973E;
+  --color-accent-dark: #A67A2E;
+  --color-bg: #F6F4EF;
+  --color-surface: #FFFFFF;
+  --color-text: #1F2A24;
+  --color-text-muted: #6B756F;
+  --color-border: #DCD7C9;
+  --color-danger: #B3261E;
+  --color-danger-dark: #8F1E18;
+  --color-success: #2D6A4F;
+  --color-info: #2E5C6E;
+
+  --font-display: "Changa", Tahoma, Arial, sans-serif;
+  --font-body: "Tajawal", Tahoma, Arial, sans-serif;
+
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(27, 67, 50, 0.12), 0 1px 2px rgba(27, 67, 50, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* إتاحة تركيز واضح لوحة المفاتيح */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- الشريط العلوي ---------- */
+
+.topbar {
+  height: 62px;
+  background: var(--color-primary-dark);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.logo::before {
+  content: "🧾 ";
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.shop-name {
+  font-size: 15px;
+  color: #D9C9A3;
+  font-weight: 500;
+}
+
+.backup-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- الهيكل ---------- */
+
+.content {
+  padding: 28px;
+}
+
+/* ---------- القائمة العلوية ---------- */
+
+.topmenu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: var(--color-primary);
+  padding: 8px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.menu-btn {
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #DCE7E0;
+  padding: 10px 14px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.menu-btn:hover {
+  background: var(--color-primary-light);
+  color: white;
+}
+
+.menu-btn.active {
+  background: var(--color-primary-light);
+  color: white;
+  border-bottom: 3px solid var(--color-accent);
+  font-weight: 700;
+}
+
+.content h1 {
+  font-family: var(--font-display);
+  margin-top: 0;
+  margin-bottom: 22px;
+  font-size: 23px;
+  color: var(--color-primary-dark);
+}
+
+.content h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--color-primary-dark);
+}
+
+/* ---------- البطاقات ---------- */
+
+.cards {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  min-width: 180px;
+  flex: 1;
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--color-border);
+}
+
+.card[data-type="sales"] {
+  border-top-color: var(--color-success);
+}
+
+.card[data-type="invoices"] {
+  border-top-color: var(--color-info);
+}
+
+.card[data-type="products"] {
+  border-top-color: var(--color-accent);
+}
+
+.card[data-type="debt"] {
+  border-top-color: var(--color-danger);
+}
+
+.card-title {
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ---------- معلومات الفاتورة ---------- */
+
+.invoice-info {
+  background: var(--color-surface);
+  padding: 15px 18px;
+  margin-bottom: 15px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+}
+
+.invoice-info strong {
+  color: var(--color-primary-dark);
+}
+
+/* ---------- منطقة الباركود / الحقول ---------- */
+
+.barcode-box {
+  background: var(--color-surface);
+  padding: 15px 18px;
+  margin-bottom: 15px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.barcode-box label {
+  display: block;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+#barcode,
+#invoice-paid,
+#invoice-customer {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-bg);
+}
+
+#barcode {
+  width: 300px;
+}
+
+#invoice-paid {
+  width: 300px;
+}
+
+#invoice-customer {
+  min-width: 240px;
+}
+
+/* ---------- الأزرار الموحدة ---------- */
+
+.btn {
+  padding: 10px 20px;
+  margin-inline-end: 6px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn-neutral {
+  background: #8C8172;
+  color: white;
+}
+
+.btn-info {
+  background: var(--color-info);
+  color: white;
+}
+
+.btn-table {
+  padding: 6px 12px;
+  margin: 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: white;
+}
+
+#barcode-search {
+  margin-right: 8px;
+}
+
+#product-name-search {
+  width: 300px;
+}
+
+#product-search-results {
+  margin-top: 10px;
+}
+
+.search-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: right;
+}
+
+.search-result-item:hover {
+  background: #EFEADB;
+  border-color: var(--color-accent);
+}
+
+.search-result-item .sr-name {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.search-result-item .sr-meta {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+}
+
+.search-result-empty {
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  padding: 6px 2px;
+}
+
+/* حقل الكمية داخل جدول الفاتورة */
+.qty-input {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.btn-table.btn-table-info {
+  background: var(--color-info);
+}
+
+.quick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-item {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  text-align: center;
+  min-width: 110px;
+}
+
+.quick-item:hover {
+  background: #EFEADB;
+  border-color: var(--color-accent);
+}
+
+.quick-item .qi-name {
+  display: block;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 3px;
+}
+
+.quick-item .qi-price {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.quick-item.quick-item-out {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#settle-customer-select,
+#settle-supplier-select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-bg);
+}
+
+.btn-table.btn-table-edit {
+  background: var(--color-accent-dark);
+}
+
+#sale-product-select,
+#purchase-product-select,
+#purchase-supplier,
+#purchase-barcode,
+#purchase-paid {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-bg);
+  width: 300px;
+}
+
+#purchase-supplier {
+  min-width: 240px;
+  width: auto;
+}
+
+/* ---------- الجداول ---------- */
+
+.table-container {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--color-primary);
+  color: white;
+  padding: 12px 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #EEEAE0;
+  text-align: center;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: #FBFAF6;
+}
+
+.empty-row td {
+  color: var(--color-text-muted);
+  padding: 26px 10px;
+  font-size: 14px;
+}
+
+/* ---------- إجمالي الفاتورة ---------- */
+
+.invoice-total {
+  background: var(--color-primary-dark);
+  color: white;
+  margin-top: 15px;
+  padding: 18px 22px;
+  text-align: left;
+  border-radius: var(--radius);
+}
+
+.invoice-total span {
+  font-size: 15px;
+  color: #C9D6CE;
+}
+
+.invoice-total strong {
+  font-family: var(--font-display);
+  font-size: 25px;
+  margin-right: 15px;
+  color: var(--color-accent);
+}
+
+/* ---------- أزرار الفاتورة ---------- */
+
+.invoice-actions {
+  margin-top: 15px;
+  text-align: left;
+}
+
+/* ---------- التنقل بين الأقسام ---------- */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- نموذج المنتجات والعملاء والإعدادات ---------- */
+
+.product-form {
+  background: var(--color-surface);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 400px;
+}
+
+.product-form h2 {
+  margin-top: 0;
+}
+
+.product-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+.product-form input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-bg);
+}
+
+.product-search {
+  margin-bottom: 15px;
+}
+
+.product-search input {
+  width: 300px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-surface);
+}
+
+/* ---------- حالة المخزون ---------- */
+
+.stock-ok {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.stock-low {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+/* =========================================
+منطقة الطباعة - فاتورة رسمية (Facture / Bon de Commande)
+========================================= */
+
+#print-area {
+  display: none;
+}
+
+.formal-invoice {
+  width: 700px;
+  margin: 0 auto;
+  font-family: var(--font-body);
+  color: #111;
+  border: 2px solid #7a2050;
+  padding: 18px;
+}
+
+.fi-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1.5px dashed #7a2050;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.fi-shop-box h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 0 0 4px 0;
+}
+
+.fi-shop-line {
+  font-size: 12.5px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.fi-badge {
+  border: 2px solid #7a2050;
+  border-radius: 50%;
+  color: #7a2050;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fi-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.fi-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  border: 1.5px solid #000;
+}
+
+.fi-table th {
+  border: 1px solid #000;
+  padding: 8px 6px;
+  font-size: 11.5px;
+  text-align: center;
+  background: #f7ecf2;
+}
+
+.fi-table td {
+  border: 1px solid #000;
+  padding: 8px 6px;
+  font-size: 13px;
+  text-align: center;
+  min-height: 18px;
+}
+
+.fi-table td:nth-child(2) {
+  text-align: right;
+}
+
+.fi-totals-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.fi-totals-table {
+  border-collapse: collapse;
+  min-width: 280px;
+  border: 1.5px solid #000;
+}
+
+.fi-totals-table td {
+  border: 1px solid #000;
+  padding: 6px 12px;
+  font-size: 13.5px;
+}
+
+.fi-totals-table td:first-child {
+  font-weight: 600;
+}
+
+.fi-totals-table td:last-child {
+  text-align: left;
+  font-weight: 700;
+  min-width: 110px;
+}
+
+.fi-totals-table[dir="ltr"] td:first-child {
+  text-align: left;
+}
+
+.fi-totals-table[dir="ltr"] td:last-child {
+  text-align: right;
+}
+
+.fi-totals-net-row td {
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: #f7ecf2;
+}
+
+.fi-solde-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fi-solde-box {
+  flex: 1;
+  border: 1px solid #999;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.fi-global-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: #7a2050;
+  padding: 6px 2px;
+  border-top: 1.5px dashed #7a2050;
+  margin-bottom: 10px;
+}
+
+.fi-note {
+  font-size: 12px;
+  color: #444;
+  text-align: center;
+  margin-top: 10px;
+  white-space: pre-line;
+}
+
+/* ---------- نافذة مسح الباركود بالكاميرا ---------- */
+
+.scanner-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 15px;
+}
+
+.scanner-box {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 15px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.scanner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+#scanner-reader {
+  width: 100%;
+}
+
+.scanner-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ---------- ملصقات الباركود ---------- */
+
+.labels-sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.barcode-label {
+  width: 190px;
+  border: 1px dashed #999;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.barcode-label .bl-name {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barcode-label .bl-price {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.barcode-label svg {
+  width: 100%;
+  height: 45px;
+}
+
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+
+  #print-area {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    padding: 12px;
+  }
+
+  .formal-invoice {
+    border-color: #000;
+  }
+
+  .fi-badge {
+    border-color: #000;
+    color: #000;
+  }
+}
+
+/* ---------- الشاشات الصغيرة ---------- */
+
+@media (max-width: 800px) {
+
+  .topmenu {
+    padding: 8px 10px;
+    gap: 2px;
+  }
+
+  .menu-btn {
+    font-size: 12.5px;
+    padding: 8px 10px;
+  }
+
+  .content {
+    padding: 15px;
+  }
+
+  .cards {
+    display: block;
+  }
+
+  .card {
+    margin-bottom: 10px;
+  }
+
+  #barcode,
+  #invoice-paid {
+    width: 220px;
+  }
+}

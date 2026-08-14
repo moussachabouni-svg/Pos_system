@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام المبيعات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Changa:wght@600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+<div class="logo">نظام المبيعات</div>
+<div class="topbar-right">
+<div class="shop-name">المحل التجريبي</div>
+<div class="backup-actions">
+<button id="backup-export-btn" class="btn-table btn-table-info" title="تنزيل نسخة احتياطية من كل البيانات">⬇ نسخة احتياطية</button>
+<button id="backup-import-btn" class="btn-table btn-table-edit" title="استيراد نسخة احتياطية سابقة">⬆ استعادة نسخة</button>
+<input type="file" id="backup-import-input" accept="application/json" style="display:none;">
+</div>
+</div>
+</header>
+
+<nav class="topmenu">
+
+<button class="menu-btn active" data-section="dashboard">🏠 الرئيسية</button>
+<button class="menu-btn" data-section="sales">🛒 المبيعات</button>
+<button class="menu-btn" data-section="purchases">🚚 المشتريات</button>
+<button class="menu-btn" data-section="products">📦 السلع</button>
+<button class="menu-btn" data-section="customers">👥 العملاء</button>
+<button class="menu-btn" data-section="suppliers">🏭 الموردين</button>
+<button class="menu-btn" data-section="settlements">💵 التسديدات</button>
+<button class="menu-btn" data-section="barcodes">🏷 طباعة الباركود</button>
+<button class="menu-btn" data-section="inventory">📋 المخزون</button>
+<button class="menu-btn" data-section="payments">💰 المدفوعات</button>
+<button class="menu-btn" data-section="reports">📊 التقارير</button>
+<button class="menu-btn" data-section="settings">⚙ الإعدادات</button>
+
+</nav>
+
+<main class="content">
+
+<section id="dashboard" class="page active">
+
+<h1>لوحة التحكم</h1>
+
+<div class="cards">
+
+<div class="card" data-type="sales">
+<div class="card-title">مبيعات اليوم</div>
+<div class="card-value" id="stat-today-sales">0.00 دج</div>
+</div>
+
+<div class="card" data-type="invoices">
+<div class="card-title">عدد الفواتير</div>
+<div class="card-value" id="stat-invoices-count">0</div>
+</div>
+
+<div class="card" data-type="products">
+<div class="card-title">المنتجات</div>
+<div class="card-value" id="stat-products-count">0</div>
+</div>
+
+<div class="card" data-type="debt">
+<div class="card-title">ديون العملاء</div>
+<div class="card-value" id="stat-customers-debt">0.00 دج</div>
+</div>
+
+</div>
+
+</section>
+
+<section id="sales" class="page">
+
+<h1>فاتورة بيع</h1>
+
+<div class="invoice-info">
+
+<div>
+رقم الفاتورة:
+<strong id="invoice-number">000001</strong>
+</div>
+
+<div>
+التاريخ:
+<strong id="invoice-date"></strong>
+</div>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="invoice-customer">العميل (اختياري)</label>
+
+<select id="invoice-customer">
+<option value="">بدون عميل</option>
+</select>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="quick-sale-category-filter">قائمة سريعة (بدون باركود) — اضغط على السلعة لإضافتها مباشرة</label>
+
+<select id="quick-sale-category-filter" style="margin-bottom:12px;">
+<option value="">كل الأصناف</option>
+</select>
+
+<div id="quick-sale-list" class="quick-list"></div>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="sale-product-select">اختر سلعة من القائمة</label>
+
+<select id="sale-product-select">
+<option value="">-- اختر سلعة --</option>
+</select>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="barcode">الباركود</label>
+
+<input
+type="text"
+id="barcode"
+placeholder="أدخل أو امسح الباركود"
+autocomplete="off"
+>
+
+<button id="barcode-search" class="btn btn-primary">بحث</button>
+
+<button id="barcode-camera-btn" type="button" class="btn btn-neutral">📷 مسح بالكاميرا</button>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="product-name-search">أو ابحث عن منتج بالاسم (لمنتج بدون باركود)</label>
+
+<input
+type="text"
+id="product-name-search"
+placeholder="اكتب اسم المنتج..."
+autocomplete="off"
+>
+
+<div id="product-search-results"></div>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>الباركود</th>
+<th>السلعة المباعة</th>
+<th>الكمية</th>
+<th>السعر</th>
+<th>الإجمالي</th>
+<th>حذف</th>
+</tr>
+</thead>
+
+<tbody id="sale-items">
+</tbody>
+
+</table>
+
+</div>
+
+<div class="invoice-total">
+
+<span>الإجمالي:</span>
+
+<strong id="grand-total">
+0.00 دج
+</strong>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="invoice-discount">التخفيض (الريمز) — مبلغ يُخصم من الإجمالي</label>
+
+<input
+type="text"
+id="invoice-discount"
+placeholder="اتركه فارغًا إذا لا يوجد تخفيض"
+autocomplete="off"
+>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="invoice-paid">المبلغ المدفوع</label>
+
+<input
+type="text"
+id="invoice-paid"
+placeholder="اتركه فارغًا إذا دُفع كامل المبلغ"
+autocomplete="off"
+>
+
+</div>
+
+<div class="invoice-actions">
+
+<button id="new-invoice" class="btn btn-neutral">
+فاتورة جديدة
+</button>
+
+<button id="print-invoice" class="btn btn-info">
+🖨 Bon de Commande
+</button>
+
+<button id="save-invoice" class="btn btn-success">
+حفظ الفاتورة
+</button>
+
+<button id="cancel-invoice" class="btn btn-danger">
+إلغاء
+</button>
+
+</div>
+
+</section>
+
+<section id="purchases" class="page">
+
+<h1>فاتورة شراء</h1>
+
+<div class="invoice-info">
+
+<div>
+رقم فاتورة الشراء:
+<strong id="purchase-number">000001</strong>
+</div>
+
+<div>
+التاريخ:
+<strong id="purchase-date"></strong>
+</div>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="purchase-supplier">المورد (اختياري)</label>
+
+<select id="purchase-supplier">
+<option value="">بدون مورد</option>
+</select>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="purchase-product-select">اختر سلعة من القائمة</label>
+
+<select id="purchase-product-select">
+<option value="">-- اختر سلعة --</option>
+</select>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="purchase-barcode">الباركود</label>
+
+<input
+type="text"
+id="purchase-barcode"
+placeholder="أدخل أو امسح الباركود"
+autocomplete="off"
+>
+
+<button id="purchase-barcode-search" class="btn btn-primary">بحث</button>
+
+<button id="purchase-barcode-camera-btn" type="button" class="btn btn-neutral">📷 مسح بالكاميرا</button>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>الباركود</th>
+<th>السلعة المشتراة</th>
+<th>الكمية</th>
+<th>سعر الشراء</th>
+<th>الإجمالي</th>
+<th>حذف</th>
+</tr>
+</thead>
+
+<tbody id="purchase-items">
+</tbody>
+
+</table>
+
+</div>
+
+<div class="invoice-total">
+
+<span>الإجمالي:</span>
+
+<strong id="purchase-grand-total">
+0.00 دج
+</strong>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="purchase-paid">المبلغ المدفوع للمورد الآن</label>
+
+<input
+type="text"
+id="purchase-paid"
+placeholder="اتركه فارغًا إذا لم تدفع شيئًا الآن (يُسجَّل الكل كدين)، أو اكتب 0 صراحة"
+autocomplete="off"
+>
+
+<button id="purchase-paid-full-btn" type="button" class="btn-table btn-table-info" style="margin-inline-start:8px;">
+دفع المبلغ بالكامل الآن
+</button>
+
+</div>
+
+<div class="invoice-actions">
+
+<button id="new-purchase" class="btn btn-neutral">
+فاتورة جديدة
+</button>
+
+<button id="save-purchase" class="btn btn-success">
+حفظ فاتورة الشراء
+</button>
+
+<button id="cancel-purchase" class="btn btn-danger">
+إلغاء
+</button>
+
+</div>
+
+<h2 style="margin-top:30px;">سجل فواتير الشراء</h2>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>رقم الفاتورة</th>
+<th>التاريخ</th>
+<th>المورد</th>
+<th>الإجمالي</th>
+<th>المدفوع</th>
+<th>الباقي (دين للمورد)</th>
+<th>طباعة</th>
+</tr>
+</thead>
+
+<tbody id="purchases-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="products" class="page">
+
+<h1>إدارة السلع (سلع مشتراة / سلع مباعة)</h1>
+
+<div class="product-form">
+
+<h2 id="product-form-title">إضافة سلعة</h2>
+
+<div>
+<label>الباركود (اختياري)</label>
+<input type="text" id="product-barcode">
+</div>
+
+<div>
+<label>اسم السلعة</label>
+<input type="text" id="product-name">
+</div>
+
+<div>
+<label>الصنف</label>
+<input type="text" id="product-category" list="category-options" placeholder="مثال: مواد غذائية">
+<datalist id="category-options"></datalist>
+</div>
+
+<div>
+<label>سعر الشراء</label>
+<input type="text" id="product-buy-price">
+</div>
+
+<div>
+<label>سعر البيع</label>
+<input type="text" id="product-sale-price">
+</div>
+
+<div>
+<label>الكمية</label>
+<input type="text" id="product-stock">
+</div>
+
+<div>
+<label>الحد الأدنى</label>
+<input type="text" id="product-min-stock">
+</div>
+
+<button id="add-product" class="btn btn-success">
+إضافة السلعة
+</button>
+
+<button id="cancel-edit-product" class="btn btn-neutral" style="display:none;">
+إلغاء التعديل
+</button>
+
+</div>
+
+<div class="product-search">
+
+<input
+type="text"
+id="product-search-input"
+placeholder="البحث بالاسم أو الباركود"
+>
+
+<select id="product-category-filter">
+<option value="">كل الأصناف</option>
+</select>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>رقم</th>
+<th>الباركود</th>
+<th>اسم السلعة</th>
+<th>الصنف</th>
+<th>سعر الشراء</th>
+<th>سعر البيع</th>
+<th>المخزون</th>
+<th>الحد الأدنى</th>
+<th>تعديل</th>
+<th>حذف</th>
+</tr>
+
+</thead>
+
+<tbody id="products-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="customers" class="page">
+
+<h1>العملاء والديون</h1>
+
+<div class="product-form">
+
+<h2 id="customer-form-title">إضافة عميل</h2>
+
+<div>
+<label>اسم العميل</label>
+<input type="text" id="customer-name">
+</div>
+
+<div>
+<label>رقم الهاتف</label>
+<input type="text" id="customer-phone">
+</div>
+
+<button id="add-customer" class="btn btn-success">
+إضافة العميل
+</button>
+
+<button id="cancel-edit-customer" class="btn btn-neutral" style="display:none;">
+إلغاء التعديل
+</button>
+
+</div>
+
+<div class="product-search">
+
+<input
+type="text"
+id="customer-search-input"
+placeholder="البحث بالاسم أو الهاتف"
+>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الهاتف</th>
+<th>الدين</th>
+<th>تعديل</th>
+<th>حذف</th>
+</tr>
+
+</thead>
+
+<tbody id="customers-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="suppliers" class="page">
+
+<h1>الموردون</h1>
+
+<div class="product-form">
+
+<h2 id="supplier-form-title">إضافة مورد</h2>
+
+<div>
+<label>اسم المورد</label>
+<input type="text" id="supplier-name">
+</div>
+
+<div>
+<label>رقم الهاتف</label>
+<input type="text" id="supplier-phone">
+</div>
+
+<div>
+<label>العنوان</label>
+<input type="text" id="supplier-address">
+</div>
+
+<button id="add-supplier" class="btn btn-success">
+إضافة المورد
+</button>
+
+<button id="cancel-edit-supplier" class="btn btn-neutral" style="display:none;">
+إلغاء التعديل
+</button>
+
+</div>
+
+<div class="product-search">
+
+<input
+type="text"
+id="supplier-search-input"
+placeholder="البحث بالاسم أو الهاتف"
+>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الهاتف</th>
+<th>العنوان</th>
+<th>الدين المستحق</th>
+<th>تعديل</th>
+<th>حذف</th>
+</tr>
+
+</thead>
+
+<tbody id="suppliers-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="settlements" class="page">
+
+<h1>التسديدات (دفع الديون)</h1>
+
+<div class="cards" style="margin-bottom:20px;">
+
+<div class="product-form" style="max-width:420px;">
+
+<h2>تسديد دين عميل</h2>
+
+<div>
+<label>العميل (تظهر فقط العملاء الذين عليهم دين)</label>
+<select id="settle-customer-select">
+<option value="">-- اختر عميلًا --</option>
+</select>
+</div>
+
+<div>
+<label>الدين الحالي</label>
+<input type="text" id="settle-customer-debt" readonly>
+</div>
+
+<div>
+<label>المبلغ المدفوع الآن</label>
+<input type="text" id="settle-customer-amount">
+</div>
+
+<button id="settle-customer-btn" class="btn btn-success">
+تسديد
+</button>
+
+<button id="print-customer-statement-btn" type="button" class="btn btn-neutral" style="margin-top:8px;">
+🖨 طباعة كشف بكل فواتيره المتأخرة
+</button>
+
+</div>
+
+<div class="product-form" style="max-width:420px;">
+
+<h2>تسديد دين مورد</h2>
+
+<div>
+<label>المورد (تظهر فقط الموردون الذين لهم دين)</label>
+<select id="settle-supplier-select">
+<option value="">-- اختر موردًا --</option>
+</select>
+</div>
+
+<div>
+<label>الدين الحالي</label>
+<input type="text" id="settle-supplier-debt" readonly>
+</div>
+
+<div>
+<label>المبلغ المدفوع الآن</label>
+<input type="text" id="settle-supplier-amount">
+</div>
+
+<button id="settle-supplier-btn" class="btn btn-success">
+تسديد
+</button>
+
+<button id="print-supplier-statement-btn" type="button" class="btn btn-neutral" style="margin-top:8px;">
+🖨 طباعة كشف بكل فواتيره المتأخرة
+</button>
+
+</div>
+
+</div>
+
+<h2>سجل فواتير عميل أو مورد (كل الفواتير، مدفوعة أو لا)</h2>
+
+<div class="cards" style="margin-bottom:20px;">
+
+<div class="product-form" style="max-width:420px;">
+
+<h2 style="font-size:15px;">فواتير عميل</h2>
+
+<div>
+<label>اختر عميلًا (كل العملاء)</label>
+<select id="history-customer-select">
+<option value="">-- اختر عميلًا --</option>
+</select>
+</div>
+
+<button id="show-customer-history-btn" class="btn btn-primary">
+عرض فواتيره
+</button>
+
+</div>
+
+<div class="product-form" style="max-width:420px;">
+
+<h2 style="font-size:15px;">فواتير مورد</h2>
+
+<div>
+<label>اختر موردًا (كل الموردين)</label>
+<select id="history-supplier-select">
+<option value="">-- اختر موردًا --</option>
+</select>
+</div>
+
+<button id="show-supplier-history-btn" class="btn btn-primary">
+عرض فواتيره
+</button>
+
+</div>
+
+</div>
+
+<div id="party-history-title" style="font-weight:700;margin-bottom:8px;"></div>
+
+<div class="table-container" style="margin-bottom:30px;">
+
+<table>
+
+<thead>
+<tr>
+<th>رقم الفاتورة</th>
+<th>التاريخ</th>
+<th>الإجمالي</th>
+<th>المدفوع</th>
+<th>الباقي</th>
+<th>طباعة</th>
+</tr>
+</thead>
+
+<tbody id="party-history-list">
+</tbody>
+
+</table>
+
+</div>
+
+<h2>سجل التسديدات</h2>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>النوع</th>
+<th>الاسم</th>
+<th>المبلغ المسدد</th>
+</tr>
+</thead>
+
+<tbody id="settlements-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="barcodes" class="page">
+
+<h1>طباعة ملصقات الباركود</h1>
+
+<div class="barcode-box">
+
+<label for="barcode-product-select">اختر سلعة</label>
+
+<select id="barcode-product-select">
+<option value="">-- اختر سلعة --</option>
+</select>
+
+</div>
+
+<div class="barcode-box">
+
+<label for="barcode-label-qty">عدد النسخ (الملصقات)</label>
+
+<input type="text" id="barcode-label-qty" value="1" style="width:100px;">
+
+<button id="add-to-barcode-queue" class="btn btn-primary">
+➕ إضافة للقائمة
+</button>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>السلعة</th>
+<th>الباركود</th>
+<th>عدد النسخ</th>
+<th>حذف</th>
+</tr>
+</thead>
+
+<tbody id="barcode-queue-list">
+</tbody>
+
+</table>
+
+</div>
+
+<div class="invoice-actions">
+
+<button id="print-barcode-labels" class="btn btn-success">
+🖨 طباعة الملصقات
+</button>
+
+<button id="clear-barcode-queue" class="btn btn-danger">
+تفريغ القائمة
+</button>
+
+</div>
+
+</section>
+
+<section id="inventory" class="page">
+
+<h1>المخزون</h1>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>الباركود</th>
+<th>اسم المنتج</th>
+<th>المخزون الحالي</th>
+<th>الحد الأدنى</th>
+<th>الحالة</th>
+</tr>
+</thead>
+
+<tbody id="inventory-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="payments" class="page">
+
+<h1>المدفوعات</h1>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>رقم الفاتورة</th>
+<th>التاريخ</th>
+<th>العميل</th>
+<th>الإجمالي</th>
+<th>المدفوع</th>
+<th>الباقي (دين)</th>
+<th>الفكة</th>
+<th>طباعة</th>
+</tr>
+</thead>
+
+<tbody id="payments-list">
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="reports" class="page">
+
+<h1>التقارير</h1>
+
+<div class="cards">
+
+<div class="card" data-type="invoices">
+<div class="card-title">إجمالي المبيعات (كل الفواتير)</div>
+<div class="card-value" id="report-total-sales">0.00 دج</div>
+</div>
+
+<div class="card" data-type="sales">
+<div class="card-title">عدد الفواتير</div>
+<div class="card-value" id="report-invoices-count">0</div>
+</div>
+
+<div class="card" data-type="debt">
+<div class="card-title">إجمالي الديون</div>
+<div class="card-value" id="report-total-debt">0.00 دج</div>
+</div>
+
+</div>
+
+</section>
+
+<section id="settings" class="page">
+
+<h1>الإعدادات</h1>
+
+<div class="product-form">
+
+<h2>بيانات المحل (تظهر في رأس الفاتورة)</h2>
+
+<div>
+<label>اسم المحل</label>
+<input type="text" id="shop-name-input">
+</div>
+
+<div>
+<label>عنوان المحل</label>
+<input type="text" id="shop-address-input">
+</div>
+
+<div>
+<label>رقم هاتف المحل</label>
+<input type="text" id="shop-phone-input">
+</div>
+
+<div>
+<label>السجل التجاري (R.C.N°) — اختياري</label>
+<input type="text" id="shop-rc-input">
+</div>
+
+<div>
+<label>رقم المادة الجبائية (Art.N°) — اختياري</label>
+<input type="text" id="shop-art-input">
+</div>
+
+<div>
+<label>ملاحظة أسفل الفاتورة</label>
+<input type="text" id="shop-note-input">
+</div>
+
+<button id="save-shop-name" class="btn btn-success">
+حفظ
+</button>
+
+</div>
+
+</section></main>
+
+<div id="scanner-overlay" class="scanner-overlay">
+
+<div class="scanner-box">
+
+<div class="scanner-header">
+<span>📷 وجّه الكاميرا نحو الباركود</span>
+<button id="scanner-close-btn" type="button" class="btn btn-danger">إغلاق</button>
+</div>
+
+<div id="scanner-reader"></div>
+
+<div class="scanner-hint">
+يتطلب المسح بالكاميرا اتصالًا آمنًا (HTTPS) — مثل رابط GitHub Pages — ولا يعمل عند فتح الملف مباشرة من الجهاز (file://)
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="app.js"></script>
+
+<div id="print-area">
+
+<div id="print-invoice-view" class="formal-invoice">
+
+<div class="fi-top-row">
+
+<div class="fi-shop-box">
+
+<h2 id="print-shop-name"></h2>
+
+<div id="print-shop-address" class="fi-shop-line"></div>
+
+<div id="print-shop-phone" class="fi-shop-line"></div>
+
+<div id="print-shop-rc" class="fi-shop-line"></div>
+
+<div id="print-shop-art" class="fi-shop-line"></div>
+
+</div>
+
+<div id="print-doc-badge" class="fi-badge">FACTURE</div>
+
+</div>
+
+<div class="fi-meta-row">
+
+<div id="print-date-number">التاريخ: .......... رقم: ..........</div>
+
+<div id="print-party">السيد: ..........</div>
+
+</div>
+
+<table id="print-table" class="fi-table">
+
+<thead>
+<tr>
+<th>الكمية<br>Quantité</th>
+<th>البيان<br>Désignation</th>
+<th>سعر الوحدة<br>P.U.</th>
+<th>المجموع<br>Total</th>
+</tr>
+</thead>
+
+<tbody id="print-items">
+</tbody>
+
+</table>
+
+<div class="fi-totals-row">
+
+<table class="fi-totals-table" dir="ltr">
+
+<tr>
+<td>Total Général</td>
+<td id="print-total-general">0.00</td>
+</tr>
+
+<tr>
+<td>Remise</td>
+<td id="print-remise">0.00</td>
+</tr>
+
+<tr>
+<td>Ancien Solde</td>
+<td id="print-ancien-solde">0.00</td>
+</tr>
+
+<tr>
+<td id="print-versement-label">Versement de jour</td>
+<td id="print-versement">0.00</td>
+</tr>
+
+<tr class="fi-totals-net-row">
+<td>NouveauSolde</td>
+<td id="print-solde-global">0.00</td>
+</tr>
+
+</table>
+
+</div>
+
+<div id="print-note" class="fi-note"></div>
+
+</div>
+
+<div id="print-statement-view" class="formal-invoice" style="display:none;"></div>
+
+<div id="print-order-view" class="formal-invoice" style="display:none;"></div>
+
+<div id="print-labels-view" class="labels-sheet" style="display:none;"></div>
+
+</div>
+
+</body>
+</html>
