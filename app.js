@@ -7577,6 +7577,21 @@ openBarcodeScanner("purchase-barcode");
 };
 }
 
+/* زر مسح الباركود بالكاميرا عند إضافة/تعديل سلعة */
+
+var productBarcodeCameraBtn =
+document.getElementById("product-barcode-camera-btn");
+
+if (productBarcodeCameraBtn) {
+
+productBarcodeCameraBtn.onclick =
+function() {
+
+openBarcodeScanner("product-barcode");
+
+};
+}
+
 /* زر إغلاق نافذة المسح بالكاميرا */
 
 var scannerCloseBtn =
