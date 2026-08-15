@@ -34,7 +34,7 @@
 <button class="menu-btn" data-section="settlements">💵 التسديدات</button>
 <button class="menu-btn" data-section="barcodes">🏷 طباعة الباركود</button>
 <button class="menu-btn" data-section="inventory">📋 المخزون</button>
-<button class="menu-btn" data-section="payments">💰 المدفوعات</button>
+<button class="menu-btn" data-section="payments">📅 سجل المبيعات</button>
 <button class="menu-btn" data-section="reports">📊 التقارير</button>
 <button class="menu-btn" data-section="settings">⚙ الإعدادات</button>
 
@@ -231,6 +231,10 @@ autocomplete="off"
 إلغاء
 </button>
 
+<button id="cancel-edit-invoice" class="btn btn-neutral" style="display:none;">
+إلغاء التعديل والعودة لفاتورة جديدة
+</button>
+
 </div>
 
 </section>
@@ -354,6 +358,10 @@ autocomplete="off"
 إلغاء
 </button>
 
+<button id="cancel-edit-purchase" class="btn btn-neutral" style="display:none;">
+إلغاء التعديل والعودة لفاتورة جديدة
+</button>
+
 </div>
 
 <h2 style="margin-top:30px;">سجل فواتير الشراء</h2>
@@ -371,6 +379,7 @@ autocomplete="off"
 <th>المدفوع</th>
 <th>الباقي (دين للمورد)</th>
 <th>طباعة</th>
+<th>تعديل</th>
 </tr>
 </thead>
 
@@ -862,7 +871,19 @@ placeholder="البحث بالاسم أو الهاتف"
 
 <section id="payments" class="page">
 
-<h1>المدفوعات</h1>
+<h1>المبيعات (سجل الفواتير)</h1>
+
+<div class="barcode-box">
+
+<label for="payments-date-filter">البحث بتاريخ محدد (لعرض مبيعات يوم معيّن)</label>
+
+<input type="date" id="payments-date-filter">
+
+<button id="payments-date-clear" class="btn btn-neutral">إظهار الكل</button>
+
+</div>
+
+<div id="payments-day-summary" style="font-weight:700;margin-bottom:10px;"></div>
 
 <div class="table-container">
 
@@ -876,7 +897,8 @@ placeholder="البحث بالاسم أو الهاتف"
 <th>الإجمالي</th>
 <th>المدفوع</th>
 <th>الباقي (دين)</th>
-<th>الفكة</th>
+<th>فرق الدفع</th>
+<th>تعديل</th>
 <th>طباعة</th>
 </tr>
 </thead>
@@ -912,6 +934,42 @@ placeholder="البحث بالاسم أو الهاتف"
 </div>
 
 </div>
+
+<h2 style="margin-top:30px;">👥 تفاصيل حساب عميل</h2>
+
+<div class="barcode-box">
+
+<label for="report-customer-select">اختر عميلًا</label>
+
+<select id="report-customer-select">
+<option value="">-- اختر عميلًا --</option>
+</select>
+
+<button id="show-report-customer-btn" class="btn btn-primary">عرض كل فواتيره</button>
+
+<button id="hide-report-customer-btn" class="btn btn-danger">إخفاء</button>
+
+</div>
+
+<div id="report-customer-details"></div>
+
+<h2 style="margin-top:30px;">🏭 تفاصيل حساب مورد</h2>
+
+<div class="barcode-box">
+
+<label for="report-supplier-select">اختر موردًا</label>
+
+<select id="report-supplier-select">
+<option value="">-- اختر موردًا --</option>
+</select>
+
+<button id="show-report-supplier-btn" class="btn btn-primary">عرض كل فواتيره</button>
+
+<button id="hide-report-supplier-btn" class="btn btn-danger">إخفاء</button>
+
+</div>
+
+<div id="report-supplier-details"></div>
 
 </section>
 

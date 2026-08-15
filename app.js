@@ -25,6 +25,10 @@ var editingCustomerId = null;
 
 var editingSupplierId = null;
 
+var editingInvoiceNumber = null;
+
+var editingPurchaseNumber = null;
+
 var settings = {
 shopName: "المحل التجريبي",
 shopAddress: "",
@@ -466,11 +470,15 @@ cancelEditProduct();
 return;
 }
 
+var editedHasBarcode = true;
+
 if (barcode == "") {
 barcode = "M" + editedProduct.id;
+editedHasBarcode = false;
 }
 
 editedProduct.barcode = barcode;
+editedProduct.hasBarcode = editedHasBarcode;
 editedProduct.name = name;
 editedProduct.category = category;
 editedProduct.buyPrice = buyPrice;
@@ -506,9 +514,13 @@ newId = products[i].id + 1;
 
 /* توليد رمز داخلي إذا لم يُدخل باركود */
 
+var hasBarcode = true;
+
 if (barcode == "") {
 
 barcode = "M" + newId;
+
+hasBarcode = false;
 }
 
 /* إنشاء المنتج */
@@ -518,6 +530,8 @@ var product = {
 id: newId,
 
 barcode: barcode,
+
+hasBarcode: hasBarcode,
 
 name: name,
 
@@ -551,6 +565,25 @@ alert("تمت إضافة السلعة بنجاح");
 تعديل / إلغاء تعديل سلعة
 ========================================= */
 
+function productHasRealBarcode(product) {
+
+if (product.hasBarcode === false) {
+return false;
+}
+
+if (product.hasBarcode === true) {
+return true;
+}
+
+/* توافق مع بيانات قديمة لا تحمل علامة hasBarcode */
+
+if (product.barcode == "M" + product.id) {
+return false;
+}
+
+return true;
+}
+
 function editProduct(id) {
 
 var product = null;
@@ -571,7 +604,8 @@ return;
 
 editingProductId = id;
 
-document.getElementById("product-barcode").value = product.barcode;
+document.getElementById("product-barcode").value =
+productHasRealBarcode(product) ? product.barcode : "";
 document.getElementById("product-name").value = product.name;
 document.getElementById("product-category").value = product.category || "";
 document.getElementById("product-buy-price").value = product.buyPrice;
@@ -1448,6 +1482,12 @@ if (filter != "" && category != filter) {
 continue;
 }
 
+/* القائمة السريعة مخصصة للسلع التي لا تملك باركودًا حقيقيًا */
+
+if (productHasRealBarcode(product)) {
+continue;
+}
+
 var item = document.createElement("div");
 
 item.className = "quick-item";
@@ -1491,7 +1531,7 @@ var emptyDiv = document.createElement("div");
 
 emptyDiv.className = "search-result-empty";
 
-emptyDiv.innerHTML = "لا توجد سلع في هذا الصنف";
+emptyDiv.innerHTML = "لا توجد سلع بدون باركود في هذا الصنف";
 
 container.appendChild(emptyDiv);
 }
@@ -1934,6 +1974,11 @@ nameSearch.value = "";
 if (nameResults) {
 nameResults.innerHTML = "";
 }
+
+if (editingInvoiceNumber != null) {
+
+cancelEditInvoice();
+}
 }
 
 /* =========================================
@@ -1955,6 +2000,144 @@ barcode.value = "";
 
 barcode.focus();
 }
+
+if (editingInvoiceNumber != null) {
+
+cancelEditInvoice();
+}
+}
+
+/* =========================================
+تعديل فاتورة بيع محفوظة
+========================================= */
+
+function editInvoice(number) {
+
+var found = null;
+
+var i;
+
+for (i = 0; i < invoices.length; i++) {
+
+if (invoices[i].number == number) {
+found = invoices[i];
+break;
+}
+}
+
+if (!found) {
+
+alert("تعذر العثور على هذه الفاتورة");
+
+return;
+}
+
+editingInvoiceNumber = number;
+
+saleItems = [];
+
+var j;
+
+for (j = 0; j < found.items.length; j++) {
+
+saleItems.push({
+
+barcode: found.items[j].barcode,
+
+name: found.items[j].name,
+
+price: found.items[j].price,
+
+quantity: found.items[j].quantity
+});
+}
+
+showSection("sales");
+
+displaySale();
+
+var customerSelect = document.getElementById("invoice-customer");
+
+if (customerSelect) {
+customerSelect.value = found.customerId != null ? found.customerId : "";
+}
+
+var discountInput = document.getElementById("invoice-discount");
+
+if (discountInput) {
+discountInput.value = found.discount ? found.discount : "";
+}
+
+var paidInput = document.getElementById("invoice-paid");
+
+if (paidInput) {
+paidInput.value = found.paid;
+}
+
+var numberElement = document.getElementById("invoice-number");
+
+if (numberElement) {
+numberElement.innerHTML =
+formatInvoiceNumber(found.number) + " (تعديل)";
+}
+
+var saveButton = document.getElementById("save-invoice");
+
+if (saveButton) {
+saveButton.innerHTML = "تحديث الفاتورة";
+}
+
+var cancelEditButton = document.getElementById("cancel-edit-invoice");
+
+if (cancelEditButton) {
+cancelEditButton.style.display = "inline-block";
+}
+
+alert(
+"تم تحميل الفاتورة رقم " + formatInvoiceNumber(found.number) +
+" للتعديل. عدّل ما تريد ثم اضغط 'تحديث الفاتورة'."
+);
+}
+
+function cancelEditInvoice() {
+
+editingInvoiceNumber = null;
+
+saleItems = [];
+
+displaySale();
+
+var discountInput = document.getElementById("invoice-discount");
+
+if (discountInput) {
+discountInput.value = "";
+}
+
+var paidInput = document.getElementById("invoice-paid");
+
+if (paidInput) {
+paidInput.value = "";
+}
+
+var customerSelect = document.getElementById("invoice-customer");
+
+if (customerSelect) {
+customerSelect.value = "";
+}
+
+var saveButton = document.getElementById("save-invoice");
+
+if (saveButton) {
+saveButton.innerHTML = "حفظ الفاتورة";
+}
+
+var cancelEditButton = document.getElementById("cancel-edit-invoice");
+
+if (cancelEditButton) {
+cancelEditButton.style.display = "none";
+}
+
+updateInvoiceNumberDisplay();
 }
 
 /* =========================================
@@ -2028,6 +2211,14 @@ if (!element) {
 return;
 }
 
+if (editingInvoiceNumber != null) {
+
+element.innerHTML =
+formatInvoiceNumber(editingInvoiceNumber) + " (تعديل)";
+
+return;
+}
+
 element.innerHTML =
 formatInvoiceNumber(peekNextInvoiceNumber());
 }
@@ -2080,6 +2271,49 @@ alert("الفاتورة فارغة");
 return;
 }
 
+/* في حال التعديل: إيجاد الفاتورة الأصلية */
+
+var existingInvoice = null;
+
+if (editingInvoiceNumber != null) {
+
+var ei;
+
+for (ei = 0; ei < invoices.length; ei++) {
+
+if (invoices[ei].number == editingInvoiceNumber) {
+existingInvoice = invoices[ei];
+break;
+}
+}
+
+if (!existingInvoice) {
+
+alert("تعذر العثور على الفاتورة المطلوب تعديلها، سيتم إلغاء التعديل");
+
+cancelEditInvoice();
+
+return;
+}
+}
+
+/* خريطة الكميات الأصلية بالفاتورة قيد التعديل (تُعتبر متاحة مجددًا عند الفحص) */
+
+var originalQtyByBarcode = {};
+
+if (existingInvoice) {
+
+var oi;
+
+for (oi = 0; oi < existingInvoice.items.length; oi++) {
+
+var oitem = existingInvoice.items[oi];
+
+originalQtyByBarcode[oitem.barcode] =
+(originalQtyByBarcode[oitem.barcode] || 0) + oitem.quantity;
+}
+}
+
 /* التأكد أن المخزون كافٍ لكل عنصر */
 
 var i;
@@ -2088,7 +2322,12 @@ for (i = 0; i < saleItems.length; i++) {
 
 var product = findProductByBarcode(saleItems[i].barcode);
 
-if (!product || product.stock < saleItems[i].quantity) {
+var availableStock = product ? product.stock : 0;
+
+availableStock =
+availableStock + (originalQtyByBarcode[saleItems[i].barcode] || 0);
+
+if (!product || availableStock < saleItems[i].quantity) {
 
 alert("الكمية غير كافية للمنتج: " + saleItems[i].name);
 
@@ -2189,7 +2428,38 @@ alert("لتسجيل مبلغ متبقٍ (دين) يجب اختيار عميل أ
 return;
 }
 
-/* خصم الكميات من المخزون */
+/* عكس تأثير الفاتورة القديمة (إن كنا في وضع التعديل) قبل تطبيق الجديدة */
+
+if (existingInvoice) {
+
+var ri;
+
+for (ri = 0; ri < existingInvoice.items.length; ri++) {
+
+var oldItem = existingInvoice.items[ri];
+
+var oldProduct = findProductByBarcode(oldItem.barcode);
+
+if (oldProduct) {
+
+oldProduct.stock = oldProduct.stock + oldItem.quantity;
+}
+}
+
+if (existingInvoice.customerId != null) {
+
+var oldCustomer = findCustomerById(existingInvoice.customerId);
+
+if (oldCustomer) {
+
+oldCustomer.debt =
+oldCustomer.debt -
+(existingInvoice.remaining - (existingInvoice.change || 0));
+}
+}
+}
+
+/* خصم الكميات الجديدة من المخزون */
 
 for (i = 0; i < saleItems.length; i++) {
 
@@ -2201,22 +2471,45 @@ stockProduct.stock - saleItems[i].quantity;
 
 saveProducts();
 
-/* تحديث دين العميل */
+/* تحديث دين العميل: الباقي يُضاف كدين، وفرق الدفع الزائد يُخصم من دينه
+(فقط إذا كان هناك عميل محدد؛ بدون عميل يبقى فرق الدفع نقدًا يُعاد فورًا) */
 
 var previousDebt = customer ? customer.debt : 0;
 
-if (customer && remaining > 0) {
+if (customer) {
 
-customer.debt = customer.debt + remaining;
+customer.debt = customer.debt + remaining - change;
+}
 
 saveCustomers();
-}
 
 var newDebt = customer ? customer.debt : 0;
 
-/* إنشاء سجل الفاتورة */
+/* تحديث فاتورة موجودة، أو إنشاء فاتورة جديدة */
 
-var invoice = {
+var invoice;
+
+if (existingInvoice) {
+
+existingInvoice.customerId = customer ? customer.id : null;
+existingInvoice.customerName = customer ? customer.name : "بدون عميل";
+existingInvoice.items = saleItems;
+existingInvoice.subtotal = subtotal;
+existingInvoice.discount = discount;
+existingInvoice.total = total;
+existingInvoice.paid = paid;
+existingInvoice.remaining = remaining;
+existingInvoice.change = change;
+existingInvoice.previousDebt = previousDebt;
+existingInvoice.newDebt = newDebt;
+existingInvoice.edited = true;
+existingInvoice.editDate = new Date().toISOString();
+
+invoice = existingInvoice;
+
+} else {
+
+invoice = {
 
 number: consumeNextInvoiceNumber(),
 
@@ -2246,17 +2539,31 @@ newDebt: newDebt
 };
 
 invoices.push(invoice);
+}
 
 saveInvoices();
 
 var savedMessage =
-"تم حفظ الفاتورة رقم " + formatInvoiceNumber(invoice.number);
+(existingInvoice ? "تم تحديث الفاتورة رقم " : "تم حفظ الفاتورة رقم ") +
+formatInvoiceNumber(invoice.number);
 
 if (change > 0) {
 
+if (customer) {
+
 savedMessage =
 savedMessage +
-"\nالفكة المستحقة للزبون: " + formatNumber(change) + " دج";
+"\nدُفع مبلغ زائد قدره " + formatNumber(change) +
+" دج — تم تسجيله كفرق دفع لصالح " + invoice.customerName +
+" وسيُخصم تلقائيًا من فاتورته القادمة (رصيده الآن: " +
+formatNumber(customer.debt) + " دج)";
+
+} else {
+
+savedMessage =
+savedMessage +
+"\nفرق الدفع المستحق للزبون (يُعاد نقدًا الآن): " + formatNumber(change) + " دج";
+}
 }
 
 if (remaining > 0) {
@@ -2322,6 +2629,25 @@ displayInventory();
 displayPayments();
 
 displayReports();
+
+/* إعادة ضبط وضع تعديل الفاتورة إن كان مفعّلًا */
+
+if (editingInvoiceNumber != null) {
+
+editingInvoiceNumber = null;
+
+var saveInvoiceBtn = document.getElementById("save-invoice");
+
+if (saveInvoiceBtn) {
+saveInvoiceBtn.innerHTML = "حفظ الفاتورة";
+}
+
+var cancelEditInvoiceBtn = document.getElementById("cancel-edit-invoice");
+
+if (cancelEditInvoiceBtn) {
+cancelEditInvoiceBtn.style.display = "none";
+}
+}
 }
 
 /* =========================================
@@ -2475,20 +2801,45 @@ return;
 
 table.innerHTML = "";
 
+var dateFilterElement =
+document.getElementById("payments-date-filter");
+
+var dateFilter = dateFilterElement ? dateFilterElement.value : "";
+
+var summaryElement =
+document.getElementById("payments-day-summary");
+
+var dayTotal = 0;
+
+var dayCount = 0;
+
 var i;
 
 for (i = invoices.length - 1; i >= 0; i--) {
 
 var invoice = invoices[i];
 
-var row = document.createElement("tr");
-
 var invoiceDate = new Date(invoice.date);
+
+var isoDate =
+invoiceDate.getFullYear() + "-" +
+(invoiceDate.getMonth() + 1 < 10 ? "0" : "") + (invoiceDate.getMonth() + 1) + "-" +
+(invoiceDate.getDate() < 10 ? "0" : "") + invoiceDate.getDate();
+
+if (dateFilter != "" && isoDate != dateFilter) {
+continue;
+}
+
+dayTotal = dayTotal + invoice.total;
+
+dayCount++;
 
 var dateText =
 invoiceDate.getDate() + "/" +
 (invoiceDate.getMonth() + 1) + "/" +
 invoiceDate.getFullYear();
+
+var row = document.createElement("tr");
 
 var cell1 = document.createElement("td");
 cell1.innerHTML = formatInvoiceNumber(invoice.number);
@@ -2513,6 +2864,26 @@ cell6b.innerHTML = formatNumber(invoice.change || 0) + " دج";
 
 var cell7 = document.createElement("td");
 
+var editButton = document.createElement("button");
+
+editButton.innerHTML = "تعديل";
+
+editButton.className = "btn-table btn-table-edit";
+
+editButton.onclick = (function(number) {
+
+return function() {
+
+editInvoice(number);
+
+};
+
+})(invoice.number);
+
+cell7.appendChild(editButton);
+
+var cell8 = document.createElement("td");
+
 var reprintButton = document.createElement("button");
 
 reprintButton.innerHTML = "🖨 طباعة";
@@ -2529,7 +2900,7 @@ reprintInvoice(number);
 
 })(invoice.number);
 
-cell7.appendChild(reprintButton);
+cell8.appendChild(reprintButton);
 
 row.appendChild(cell1);
 row.appendChild(cell2);
@@ -2539,13 +2910,33 @@ row.appendChild(cell5);
 row.appendChild(cell6);
 row.appendChild(cell6b);
 row.appendChild(cell7);
+row.appendChild(cell8);
 
 table.appendChild(row);
 }
 
-if (invoices.length == 0) {
+if (dayCount == 0) {
 
-showEmptyRow(table, 8, "لا توجد فواتير محفوظة بعد");
+var emptyMessage =
+dateFilter != "" ?
+"لا توجد مبيعات في هذا التاريخ" :
+"لا توجد فواتير محفوظة بعد";
+
+showEmptyRow(table, 9, emptyMessage);
+}
+
+if (summaryElement) {
+
+if (dateFilter != "") {
+
+summaryElement.innerHTML =
+"عدد الفواتير: " + dayCount +
+" — إجمالي مبيعات هذا اليوم: " + formatNumber(dayTotal) + " دج";
+
+} else {
+
+summaryElement.innerHTML = "";
+}
 }
 }
 
@@ -2591,6 +2982,315 @@ document.getElementById("report-total-debt");
 if (debtElement) {
 debtElement.innerHTML = formatNumber(totalDebt) + " دج";
 }
+
+populateReportPartySelects();
+}
+
+/* =========================================
+تفاصيل حساب عميل/مورد داخل التقارير
+========================================= */
+
+function populateReportPartySelects() {
+
+var customerSelect = document.getElementById("report-customer-select");
+
+if (customerSelect) {
+
+var currentCustomerValue = customerSelect.value;
+
+customerSelect.innerHTML = '<option value="">-- اختر عميلًا --</option>';
+
+var i;
+
+for (i = 0; i < customers.length; i++) {
+
+var option = document.createElement("option");
+
+option.value = customers[i].id;
+
+option.innerHTML = customers[i].name;
+
+customerSelect.appendChild(option);
+}
+
+customerSelect.value = currentCustomerValue;
+}
+
+var supplierSelect = document.getElementById("report-supplier-select");
+
+if (supplierSelect) {
+
+var currentSupplierValue = supplierSelect.value;
+
+supplierSelect.innerHTML = '<option value="">-- اختر موردًا --</option>';
+
+var j;
+
+for (j = 0; j < suppliers.length; j++) {
+
+var supplierOption = document.createElement("option");
+
+supplierOption.value = suppliers[j].id;
+
+supplierOption.innerHTML = suppliers[j].name;
+
+supplierSelect.appendChild(supplierOption);
+}
+
+supplierSelect.value = currentSupplierValue;
+}
+}
+
+function showReportCustomerDetails() {
+
+var select = document.getElementById("report-customer-select");
+
+var customerId = select ? select.value : "";
+
+var container = document.getElementById("report-customer-details");
+
+if (!container) {
+return;
+}
+
+if (customerId == "") {
+
+alert("اختر عميلًا أولًا");
+
+return;
+}
+
+var customer = findCustomerById(Number(customerId));
+
+if (!customer) {
+
+alert("تعذر العثور على العميل");
+
+return;
+}
+
+var customerInvoices = [];
+
+var i;
+
+for (i = 0; i < invoices.length; i++) {
+
+if (invoices[i].customerId == customer.id) {
+customerInvoices.push(invoices[i]);
+}
+}
+
+customerInvoices.sort(function(a, b) {
+
+return new Date(a.date) - new Date(b.date);
+});
+
+var header =
+"العميل: " + customer.name +
+(customer.phone ? " — الهاتف: " + customer.phone : "") +
+" — الدين الحالي: " + formatNumber(customer.debt) + " دج";
+
+container.innerHTML =
+buildPartyInvoicesTable(customerInvoices, "sale", header);
+}
+
+function hideReportCustomerDetails() {
+
+var container = document.getElementById("report-customer-details");
+
+if (container) {
+container.innerHTML = "";
+}
+
+var select = document.getElementById("report-customer-select");
+
+if (select) {
+select.value = "";
+}
+}
+
+function showReportSupplierDetails() {
+
+var select = document.getElementById("report-supplier-select");
+
+var supplierId = select ? select.value : "";
+
+var container = document.getElementById("report-supplier-details");
+
+if (!container) {
+return;
+}
+
+if (supplierId == "") {
+
+alert("اختر موردًا أولًا");
+
+return;
+}
+
+var supplier = findSupplierById(Number(supplierId));
+
+if (!supplier) {
+
+alert("تعذر العثور على المورد");
+
+return;
+}
+
+var supplierPurchases = [];
+
+var i;
+
+for (i = 0; i < purchases.length; i++) {
+
+if (purchases[i].supplierId == supplier.id) {
+supplierPurchases.push(purchases[i]);
+}
+}
+
+supplierPurchases.sort(function(a, b) {
+
+return new Date(a.date) - new Date(b.date);
+});
+
+var header =
+"المورد: " + supplier.name +
+(supplier.phone ? " — الهاتف: " + supplier.phone : "") +
+" — الدين الحالي له: " + formatNumber(supplier.debt) + " دج";
+
+container.innerHTML =
+buildPartyInvoicesTable(supplierPurchases, "purchase", header);
+}
+
+function hideReportSupplierDetails() {
+
+var container = document.getElementById("report-supplier-details");
+
+if (container) {
+container.innerHTML = "";
+}
+
+var select = document.getElementById("report-supplier-select");
+
+if (select) {
+select.value = "";
+}
+}
+
+/* =========================================
+جدول موحّد لكل فواتير عميل/مورد مع صف مجاميع
+========================================= */
+
+function buildPartyInvoicesTable(records, kind, headerText) {
+
+var html = "";
+
+html = html + '<div class="report-summary-box">' + headerText + '</div>';
+
+if (records.length == 0) {
+
+html = html +
+'<div class="search-result-empty">لا توجد فواتير بعد</div>';
+
+return html;
+}
+
+html = html + '<div class="table-container"><table><thead><tr>';
+html = html + '<th>التاريخ</th>';
+html = html + '<th>رقم الفاتورة</th>';
+html = html + '<th>الكمية</th>';
+html = html + '<th>المبلغ</th>';
+html = html + '<th>التخفيض</th>';
+html = html + '<th>المجموع</th>';
+html = html + '<th>المدفوع</th>';
+html = html + '<th>الباقي</th>';
+html = html + '<th>طباعة</th>';
+html = html + '<th>تعديل</th>';
+html = html + '</tr></thead><tbody>';
+
+var totalAmount = 0;
+
+var totalDiscount = 0;
+
+var totalNet = 0;
+
+var totalPaid = 0;
+
+var totalRemaining = 0;
+
+var i;
+
+for (i = 0; i < records.length; i++) {
+
+var record = records[i];
+
+var recordDate = new Date(record.date);
+
+var dateText =
+recordDate.getDate() + "/" +
+(recordDate.getMonth() + 1) + "/" +
+recordDate.getFullYear();
+
+var totalQty = 0;
+
+var j;
+
+for (j = 0; j < record.items.length; j++) {
+
+totalQty = totalQty + record.items[j].quantity;
+}
+
+var subtotal =
+record.subtotal != null ? record.subtotal : record.total;
+
+var discount = record.discount || 0;
+
+totalAmount = totalAmount + subtotal;
+
+totalDiscount = totalDiscount + discount;
+
+totalNet = totalNet + record.total;
+
+totalPaid = totalPaid + record.paid;
+
+totalRemaining = totalRemaining + record.remaining;
+
+html = html + '<tr>';
+html = html + '<td>' + dateText + '</td>';
+html = html + '<td>' + formatInvoiceNumber(record.number) + '</td>';
+html = html + '<td>' + totalQty + '</td>';
+html = html + '<td>' + formatNumber(subtotal) + '</td>';
+html = html + '<td>' + formatNumber(discount) + '</td>';
+html = html + '<td>' + formatNumber(record.total) + '</td>';
+html = html + '<td>' + formatNumber(record.paid) + '</td>';
+html = html + '<td>' + formatNumber(record.remaining) + '</td>';
+
+html = html + '<td><button class="btn-table btn-table-info" onclick="' +
+(kind == "sale" ? "reprintInvoice(" : "reprintPurchase(") +
+record.number + ')">🖨</button></td>';
+
+html = html + '<td><button class="btn-table btn-table-edit" onclick="' +
+(kind == "sale" ? "editInvoice(" : "editPurchase(") +
+record.number + ')">تعديل</button></td>';
+
+html = html + '</tr>';
+}
+
+html = html + '</tbody>';
+
+html = html + '<tfoot><tr style="font-weight:700;background:var(--color-primary);color:white;">';
+html = html + '<td colspan="3">المجموع الكلي</td>';
+html = html + '<td>' + formatNumber(totalAmount) + '</td>';
+html = html + '<td>' + formatNumber(totalDiscount) + '</td>';
+html = html + '<td>' + formatNumber(totalNet) + '</td>';
+html = html + '<td>' + formatNumber(totalPaid) + '</td>';
+html = html + '<td>' + formatNumber(totalRemaining) + '</td>';
+html = html + '<td colspan="2"></td>';
+html = html + '</tr></tfoot>';
+
+html = html + '</table></div>';
+
+return html;
 }
 
 /* =========================================
@@ -3787,6 +4487,11 @@ if (barcode) {
 barcode.value = "";
 barcode.focus();
 }
+
+if (editingPurchaseNumber != null) {
+
+cancelEditPurchase();
+}
 }
 
 function cancelPurchaseInvoice() {
@@ -3801,6 +4506,132 @@ if (barcode) {
 barcode.value = "";
 barcode.focus();
 }
+
+if (editingPurchaseNumber != null) {
+
+cancelEditPurchase();
+}
+}
+
+/* =========================================
+تعديل فاتورة شراء محفوظة
+========================================= */
+
+function editPurchase(number) {
+
+var found = null;
+
+var i;
+
+for (i = 0; i < purchases.length; i++) {
+
+if (purchases[i].number == number) {
+found = purchases[i];
+break;
+}
+}
+
+if (!found) {
+
+alert("تعذر العثور على فاتورة الشراء هذه");
+
+return;
+}
+
+editingPurchaseNumber = number;
+
+purchaseItems = [];
+
+var j;
+
+for (j = 0; j < found.items.length; j++) {
+
+purchaseItems.push({
+
+barcode: found.items[j].barcode,
+
+name: found.items[j].name,
+
+price: found.items[j].price,
+
+quantity: found.items[j].quantity
+});
+}
+
+showSection("purchases");
+
+displayPurchase();
+
+var supplierSelect = document.getElementById("purchase-supplier");
+
+if (supplierSelect) {
+supplierSelect.value = found.supplierId != null ? found.supplierId : "";
+}
+
+var paidInput = document.getElementById("purchase-paid");
+
+if (paidInput) {
+paidInput.value = found.paid;
+}
+
+var numberElement = document.getElementById("purchase-number");
+
+if (numberElement) {
+numberElement.innerHTML =
+formatInvoiceNumber(found.number) + " (تعديل)";
+}
+
+var saveButton = document.getElementById("save-purchase");
+
+if (saveButton) {
+saveButton.innerHTML = "تحديث فاتورة الشراء";
+}
+
+var cancelEditButton = document.getElementById("cancel-edit-purchase");
+
+if (cancelEditButton) {
+cancelEditButton.style.display = "inline-block";
+}
+
+alert(
+"تم تحميل فاتورة الشراء رقم " + formatInvoiceNumber(found.number) +
+" للتعديل. عدّل ما تريد ثم اضغط 'تحديث فاتورة الشراء'."
+);
+}
+
+function cancelEditPurchase() {
+
+editingPurchaseNumber = null;
+
+purchaseItems = [];
+
+displayPurchase();
+
+var paidInput = document.getElementById("purchase-paid");
+
+if (paidInput) {
+paidInput.value = "";
+}
+
+var supplierSelect = document.getElementById("purchase-supplier");
+
+if (supplierSelect) {
+supplierSelect.value = "";
+}
+
+var saveButton = document.getElementById("save-purchase");
+
+if (saveButton) {
+saveButton.innerHTML = "حفظ فاتورة الشراء";
+}
+
+var cancelEditButton = document.getElementById("cancel-edit-purchase");
+
+if (cancelEditButton) {
+cancelEditButton.style.display = "none";
+}
+
+updatePurchaseNumberDisplay();
 }
 
 var purchaseSeq = 0;
@@ -3856,6 +4687,14 @@ if (!element) {
 return;
 }
 
+if (editingPurchaseNumber != null) {
+
+element.innerHTML =
+formatInvoiceNumber(editingPurchaseNumber) + " (تعديل)";
+
+return;
+}
+
 element.innerHTML = formatInvoiceNumber(peekNextPurchaseNumber());
 }
 
@@ -3870,6 +4709,32 @@ if (purchaseItems.length == 0) {
 alert("فاتورة الشراء فارغة");
 
 return;
+}
+
+/* في حال التعديل: إيجاد فاتورة الشراء الأصلية */
+
+var existingPurchase = null;
+
+if (editingPurchaseNumber != null) {
+
+var ei;
+
+for (ei = 0; ei < purchases.length; ei++) {
+
+if (purchases[ei].number == editingPurchaseNumber) {
+existingPurchase = purchases[ei];
+break;
+}
+}
+
+if (!existingPurchase) {
+
+alert("تعذر العثور على فاتورة الشراء المطلوب تعديلها، سيتم إلغاء التعديل");
+
+cancelEditPurchase();
+
+return;
+}
 }
 
 var total = 0;
@@ -3923,6 +4788,57 @@ alert("لتسجيل مبلغ متبقٍ (دين) يجب اختيار مورد أ
 return;
 }
 
+/* عند التعديل: التحقق أن الكمية القديمة لم تُبَع جزئيًا مما يمنع عكسها بأمان */
+
+if (existingPurchase) {
+
+var ci;
+
+for (ci = 0; ci < existingPurchase.items.length; ci++) {
+
+var checkItem = existingPurchase.items[ci];
+
+var checkProduct = findProductByBarcode(checkItem.barcode);
+
+if (checkProduct && (checkProduct.stock - checkItem.quantity) < 0) {
+
+alert(
+"لا يمكن تعديل هذه الفاتورة لأن جزءًا من كمية السلعة \"" +
+checkItem.name + "\" تم بيعه بالفعل من المخزون الحالي"
+);
+
+return;
+}
+}
+}
+
+/* عكس تأثير فاتورة الشراء القديمة قبل تطبيق الجديدة */
+
+if (existingPurchase) {
+
+var ri;
+
+for (ri = 0; ri < existingPurchase.items.length; ri++) {
+
+var oldItem = existingPurchase.items[ri];
+
+var oldProduct = findProductByBarcode(oldItem.barcode);
+
+if (oldProduct) {
+oldProduct.stock = oldProduct.stock - oldItem.quantity;
+}
+}
+
+if (existingPurchase.supplierId != null) {
+
+var oldSupplier = findSupplierById(existingPurchase.supplierId);
+
+if (oldSupplier) {
+oldSupplier.debt = oldSupplier.debt - existingPurchase.remaining;
+}
+}
+}
+
 /* زيادة المخزون وتحديث سعر الشراء لكل سلعة */
 
 for (i = 0; i < purchaseItems.length; i++) {
@@ -3944,13 +4860,32 @@ var previousSupplierDebt = supplier ? supplier.debt : 0;
 if (supplier && remaining > 0) {
 
 supplier.debt = supplier.debt + remaining;
+}
 
 saveSuppliers();
-}
 
 var newSupplierDebt = supplier ? supplier.debt : 0;
 
-var purchase = {
+var purchase;
+
+if (existingPurchase) {
+
+existingPurchase.supplierId = supplier ? supplier.id : null;
+existingPurchase.supplierName = supplier ? supplier.name : "بدون مورد";
+existingPurchase.items = purchaseItems;
+existingPurchase.total = total;
+existingPurchase.paid = paid;
+existingPurchase.remaining = remaining;
+existingPurchase.previousDebt = previousSupplierDebt;
+existingPurchase.newDebt = newSupplierDebt;
+existingPurchase.edited = true;
+existingPurchase.editDate = new Date().toISOString();
+
+purchase = existingPurchase;
+
+} else {
+
+purchase = {
 
 number: consumeNextPurchaseNumber(),
 
@@ -3974,11 +4909,13 @@ newDebt: newSupplierDebt
 };
 
 purchases.push(purchase);
+}
 
 savePurchases();
 
 var savedMessage =
-"تم حفظ فاتورة الشراء رقم " + formatInvoiceNumber(purchase.number);
+(existingPurchase ? "تم تحديث فاتورة الشراء رقم " : "تم حفظ فاتورة الشراء رقم ") +
+formatInvoiceNumber(purchase.number);
 
 if (remaining > 0) {
 
@@ -4028,6 +4965,25 @@ updateDashboard();
 displayInventory();
 
 displayPurchasesList();
+
+/* إعادة ضبط وضع تعديل فاتورة الشراء إن كان مفعّلًا */
+
+if (editingPurchaseNumber != null) {
+
+editingPurchaseNumber = null;
+
+var savePurchaseBtn = document.getElementById("save-purchase");
+
+if (savePurchaseBtn) {
+savePurchaseBtn.innerHTML = "حفظ فاتورة الشراء";
+}
+
+var cancelEditPurchaseBtn = document.getElementById("cancel-edit-purchase");
+
+if (cancelEditPurchaseBtn) {
+cancelEditPurchaseBtn.style.display = "none";
+}
+}
 }
 
 /* =========================================
@@ -4095,6 +5051,24 @@ reprintPurchase(number);
 
 cell7.appendChild(reprintButton);
 
+var cell8 = document.createElement("td");
+
+var editButton = document.createElement("button");
+
+editButton.innerHTML = "تعديل";
+
+editButton.className = "btn-table btn-table-edit";
+
+editButton.onclick = (function(number) {
+
+return function() {
+editPurchase(number);
+};
+
+})(purchase.number);
+
+cell8.appendChild(editButton);
+
 row.appendChild(cell1);
 row.appendChild(cell2);
 row.appendChild(cell3);
@@ -4102,13 +5076,14 @@ row.appendChild(cell4);
 row.appendChild(cell5);
 row.appendChild(cell6);
 row.appendChild(cell7);
+row.appendChild(cell8);
 
 table.appendChild(row);
 }
 
 if (purchases.length == 0) {
 
-showEmptyRow(table, 7, "لا توجد فواتير شراء محفوظة بعد");
+showEmptyRow(table, 8, "لا توجد فواتير شراء محفوظة بعد");
 }
 }
 
@@ -6002,6 +6977,21 @@ cancelInvoice();
 };
 }
 
+/* إلغاء تعديل الفاتورة */
+
+var cancelEditInvoiceButton =
+document.getElementById("cancel-edit-invoice");
+
+if (cancelEditInvoiceButton) {
+
+cancelEditInvoiceButton.onclick =
+function() {
+
+cancelEditInvoice();
+
+};
+}
+
 /* زر إضافة عميل */
 
 var addCustomerButton =
@@ -6332,6 +7322,21 @@ cancelPurchaseInvoice();
 };
 }
 
+/* إلغاء تعديل فاتورة الشراء */
+
+var cancelEditPurchaseButton =
+document.getElementById("cancel-edit-purchase");
+
+if (cancelEditPurchaseButton) {
+
+cancelEditPurchaseButton.onclick =
+function() {
+
+cancelEditPurchase();
+
+};
+}
+
 /* عرض دين العميل المختار في شاشة التسديدات */
 
 var settleCustomerSelect =
@@ -6482,6 +7487,66 @@ showSupplierHistory();
 };
 }
 
+/* زر عرض تفاصيل فواتير عميل داخل التقارير */
+
+var showReportCustomerBtn =
+document.getElementById("show-report-customer-btn");
+
+if (showReportCustomerBtn) {
+
+showReportCustomerBtn.onclick =
+function() {
+
+showReportCustomerDetails();
+
+};
+}
+
+/* زر عرض تفاصيل فواتير مورد داخل التقارير */
+
+var showReportSupplierBtn =
+document.getElementById("show-report-supplier-btn");
+
+if (showReportSupplierBtn) {
+
+showReportSupplierBtn.onclick =
+function() {
+
+showReportSupplierDetails();
+
+};
+}
+
+/* زر إخفاء تفاصيل فواتير عميل داخل التقارير */
+
+var hideReportCustomerBtn =
+document.getElementById("hide-report-customer-btn");
+
+if (hideReportCustomerBtn) {
+
+hideReportCustomerBtn.onclick =
+function() {
+
+hideReportCustomerDetails();
+
+};
+}
+
+/* زر إخفاء تفاصيل فواتير مورد داخل التقارير */
+
+var hideReportSupplierBtn =
+document.getElementById("hide-report-supplier-btn");
+
+if (hideReportSupplierBtn) {
+
+hideReportSupplierBtn.onclick =
+function() {
+
+hideReportSupplierDetails();
+
+};
+}
+
 /* زر مسح الباركود بالكاميرا في المبيعات */
 
 var barcodeCameraBtn =
@@ -6569,6 +7634,39 @@ function() {
 
 clearBarcodeQueue();
 
+};
+}
+
+/* البحث بالتاريخ في سجل المبيعات */
+
+var paymentsDateFilter =
+document.getElementById("payments-date-filter");
+
+if (paymentsDateFilter) {
+
+paymentsDateFilter.onchange =
+function() {
+
+displayPayments();
+
+};
+}
+
+/* زر إظهار كل المبيعات (إلغاء تصفية التاريخ) */
+
+var paymentsDateClearBtn =
+document.getElementById("payments-date-clear");
+
+if (paymentsDateClearBtn) {
+
+paymentsDateClearBtn.onclick =
+function() {
+
+if (paymentsDateFilter) {
+paymentsDateFilter.value = "";
+}
+
+displayPayments();
 };
 }
 
